@@ -27,9 +27,9 @@ NTSTATUS kuhl_m_privilege_simple(ULONG privId)
 {
 	ULONG previousState;
 	NTSTATUS status = RtlAdjustPrivilege(privId, TRUE, FALSE, &previousState);
-	if(NT_SUCCESS(status))
-		kprintf(L"Privilege \'%u\' OK\n", privId);
-	else PRINT_ERROR(L"RtlAdjustPrivilege (%u) %08x\n", privId, status);
+	//if(NT_SUCCESS(status))
+	//	kprintf(L"Privilege \'%u\' OK\n", privId);
+	//else PRINT_ERROR(L"RtlAdjustPrivilege (%u) %08x\n", privId, status);
 	return status;
 }
 

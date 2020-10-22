@@ -60,30 +60,13 @@ void kull_m_cred_delete(PKULL_M_CRED_BLOB cred)
 
 void kull_m_cred_descr(DWORD level, PKULL_M_CRED_BLOB cred)
 {
-	kprintf(L"%*s" L"**CREDENTIAL**\n", level << 1, L"");
-	if(cred)
+	if(cred && cred->CredentialBlob)
 	{
-		kprintf(L"%*s" L"  credFlags      : %08x - %u\n", level << 1, L"", cred->credFlags, cred->credFlags);
-		kprintf(L"%*s" L"  credSize       : %08x - %u\n", level << 1, L"", cred->credSize, cred->credSize);
-		kprintf(L"%*s" L"  credUnk0       : %08x - %u\n\n", level << 1, L"", cred->credUnk0, cred->credUnk0);
-		kprintf(L"%*s" L"  Type           : %08x - %u - %s\n", level << 1, L"", cred->Type, cred->Type, kull_m_cred_CredType(cred->Type));
-		kprintf(L"%*s" L"  Flags          : %08x - %u\n", level << 1, L"", cred->Flags, cred->Flags);
-		kprintf(L"%*s" L"  LastWritten    : ", level << 1, L""); kull_m_string_displayFileTime(&cred->LastWritten); kprintf(L"\n");
-		kprintf(L"%*s" L"  unkFlagsOrSize : %08x - %u\n", level << 1, L"", cred->unkFlagsOrSize, cred->unkFlagsOrSize);
-		kprintf(L"%*s" L"  Persist        : %08x - %u - %s\n", level << 1, L"", cred->Persist, cred->Persist, kull_m_cred_CredPersist(cred->Persist));
-		kprintf(L"%*s" L"  AttributeCount : %08x - %u\n", level << 1, L"", cred->AttributeCount, cred->AttributeCount);
-		kprintf(L"%*s" L"  unk0           : %08x - %u\n", level << 1, L"", cred->unk0, cred->unk0);
-		kprintf(L"%*s" L"  unk1           : %08x - %u\n", level << 1, L"", cred->unk1, cred->unk1);
-		kprintf(L"%*s" L"  TargetName     : %s\n", level << 1, L"", cred->TargetName);
-		kprintf(L"%*s" L"  UnkData        : %s\n", level << 1, L"", cred->UnkData);
-		kprintf(L"%*s" L"  Comment        : %s\n", level << 1, L"", cred->Comment);
-		kprintf(L"%*s" L"  TargetAlias    : %s\n", level << 1, L"", cred->TargetAlias);
-		kprintf(L"%*s" L"  UserName       : %s\n", level << 1, L"", cred->UserName);
-		kprintf(L"%*s" L"  CredentialBlob : ", level << 1, L"");
+		LPWSTR target = cred->TargetName ? cred->TargetName : cred->TargetAlias;
+		kprintf(L"%s\n", target);
+		kprintf(L"%s\n", cred->UserName);
+		//kprintf(L"password:);
 		kull_m_string_printSuspectUnicodeString(cred->CredentialBlob, cred->CredentialBlobSize);
-		kprintf(L"\n");
-		kprintf(L"%*s" L"  Attributes     : %u\n", level << 1, L"", cred->AttributeCount);
-		kull_m_cred_attributes_descr(level + 1, cred->Attributes, cred->AttributeCount);
 	}
 }
 

@@ -25,7 +25,7 @@ void CALLBACK kuhl_m_sekurlsa_enum_logon_callback_msv(IN PKIWI_BASIC_SECURITY_LO
 BOOL CALLBACK kuhl_m_sekurlsa_msv_enum_cred_callback_std(IN PKUHL_M_SEKURLSA_CONTEXT cLsass, IN PKIWI_MSV1_0_PRIMARY_CREDENTIALS pCredentials, IN DWORD AuthenticationPackageId, IN PKULL_M_MEMORY_ADDRESS origBufferAddress, IN OPTIONAL LPVOID pOptionalData)
 {
 	DWORD flags = KUHL_SEKURLSA_CREDS_DISPLAY_CREDENTIAL;
-	kprintf(L"\n\t [%08x] %Z", AuthenticationPackageId, &pCredentials->Primary);
+	//kprintf(L"\n\t [%08x] %Z", AuthenticationPackageId, &pCredentials->Primary);
 	if(RtlEqualString(&pCredentials->Primary, &PRIMARY_STRING, FALSE))
 		flags |= KUHL_SEKURLSA_CREDS_DISPLAY_PRIMARY;
 	else if(RtlEqualString(&pCredentials->Primary, &CREDENTIALKEYS_STRING, FALSE))

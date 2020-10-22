@@ -474,40 +474,40 @@ BOOL kuhl_m_dpapi_unprotect_raw_or_blob(LPCVOID pDataIn, DWORD dwDataInLen, LPWS
 		entry = kuhl_m_dpapi_oe_masterkey_get(&blob->guidMasterKey);
 		if(entry || (masterkey && masterkeyLen) || isNormalAPI)
 		{
-			if(pText)
-				kprintf(L"%s", pText);
+			//if(pText)
+			//	kprintf(L"%s", pText);
 
-			if(isNormalAPI)
-			{
-				kprintf(L" * using CryptUnprotectData API\n");
-			}
+			//if(isNormalAPI)
+			//{
+			//	kprintf(L" * using CryptUnprotectData API\n");
+			//}
 			
-			if(entry)
-			{
-				kprintf(L" * volatile cache: ");
-				kuhl_m_dpapi_oe_masterkey_descr(entry);
-			}
-			if(masterkey)
-			{
-				kprintf(L" * masterkey     : ");
-				kull_m_string_wprintf_hex(masterkey, masterkeyLen, 0);
-				kprintf(L"\n");
-			}
+			//if(entry)
+			//{
+			//	kprintf(L" * volatile cache: ");
+			//	kuhl_m_dpapi_oe_masterkey_descr(entry);
+			//}
+			//if(masterkey)
+			//{
+			//	kprintf(L" * masterkey     : ");
+			//	kull_m_string_wprintf_hex(masterkey, masterkeyLen, 0);
+			//	kprintf(L"\n");
+			//}
 			if(pPrompt)
 			{
-				kprintf(L" > prompt flags  : ");
+				/*kprintf(L" > prompt flags  : ");
 				kull_m_dpapi_displayPromptFlags(pPrompt->dwPromptFlags);
-				kprintf(L"\n");
+				kprintf(L"\n");*/
 			}
 			else flags |= CRYPTPROTECT_UI_FORBIDDEN;
-			if(entropy)
+			/*if(entropy)
 			{
 				kprintf(L" > entropy       : ");
 				kull_m_string_wprintf_hex(entropy, entropyLen, 0);
 				kprintf(L"\n");
-			}
-			if(szPassword)
-				kprintf(L" > password      : %s\n", szPassword);
+			}*/
+			//if(szPassword)
+			//	kprintf(L" > password      : %s\n", szPassword);
 
 			if(entry)
 				status = kull_m_dpapi_unprotect_raw_or_blob(pDataIn, dwDataInLen, ppszDataDescr, (pOptionalEntropy && dwOptionalEntropyLen) ? pOptionalEntropy : entropy, (pOptionalEntropy && dwOptionalEntropyLen) ? dwOptionalEntropyLen : entropyLen, NULL, 0, pDataOut, dwDataOutLen, entry->data.keyHash, sizeof(entry->data.keyHash), szPassword);
@@ -522,11 +522,11 @@ BOOL kuhl_m_dpapi_unprotect_raw_or_blob(LPCVOID pDataIn, DWORD dwDataInLen, LPWS
 				{
 					if(GetLastError() == NTE_BAD_KEY_STATE)
 					{
-						PRINT_ERROR(L"NTE_BAD_KEY_STATE, needed Masterkey is: ");
-						kull_m_string_displayGUID(&blob->guidMasterKey);
-						kprintf(L"\n");
+						//PRINT_ERROR(L"NTE_BAD_KEY_STATE, needed Masterkey is: ");
+						//kull_m_string_displayGUID(&blob->guidMasterKey);
+						//kprintf(L"\n");
 					}
-					else PRINT_ERROR_AUTO(L"CryptUnprotectData");
+					//else PRINT_ERROR_AUTO(L"CryptUnprotectData");
 				}
 			}
 			//kprintf(L"\n");

